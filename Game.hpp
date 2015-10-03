@@ -10,6 +10,10 @@
 #define Game_h
 
 #include "SoraIncludes.h"
+#include "BNDGameContext.hpp"
+#include "BNDEntityManager.hpp"
+#include "Define.hpp"
+#include "GameState.hpp"
 
 
 class CGame
@@ -25,7 +29,8 @@ private:
     CTextureFactory m_TextureFactory;
     CSoundFactory m_SoundFactory;
     CFontFactory m_FontFactory;
-    //Add Entity Mngr, and Game Context
+    CBNDEntityManager m_EntityManager;
+    CBNDGameContext m_GameContext;
     
 public:
     
