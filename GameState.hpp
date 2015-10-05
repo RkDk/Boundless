@@ -17,6 +17,9 @@ private:
     
     CGameInput m_GameInput;
     
+    CTextureImage * m_pPlayerSprite;
+    CWorldEntity * m_pPlayer;
+    
 public:
     
     void Init();

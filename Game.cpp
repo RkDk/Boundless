@@ -19,22 +19,11 @@ CGame::CGame() {
     m_GraphicsContext.CreateHandle( "Boundless", 0, 0, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, false );
     m_GraphicsContext.SetDrawMode( DrawMode::DRAW_MODE_2D );
     
-    int shaderID = m_GraphicsContext.LoadShaderProgram( "data/shaders/basic_vertex.v", "data/shaders/basic_fragment.f" );
-    int width, height;
-    
-    m_GraphicsContext.GetWindowSize( &width, &height );
+    m_GraphicsContext.LoadShaderProgram( "data/shaders/basic_vertex.v", "data/shaders/basic_fragment.f" );
     
     m_GraphicsContext.SetClearColor( .1f, .1f, .1f, 1.0f );
     
     SDL_ShowCursor( 0 );
-    
-    /////////////////////////////////////////////////////
-    /////////////Draw context initialization/////////////
-    /////////////////////////////////////////////////////
-    
-    m_DrawContext.UseShaderProgram( shaderID );
-    m_DrawContext.Calculate2DProjectionMatrix( width, height );
-    m_DrawContext.Bind2DVertexBuffer();
     
     Log::Debug( "Draw Context initialized" );
     
@@ -73,6 +62,7 @@ CGame::CGame() {
     /////////////////////////////////////////////////////
     
     CGameState * pGameState = new CGameState;
+    m_EntityManager.SetEntityContext( &m_GameContext );
     pGameState->SetGameContext( &m_GameContext );
   
     m_StateMachine.AddState( "GAME", ( CStateBase * )pGameState );

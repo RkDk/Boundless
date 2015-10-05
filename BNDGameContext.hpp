@@ -11,16 +11,28 @@
 
 #include "SoraIncludes.h"
 #include "LuaContext.hpp"
+#include "Define.hpp" 
 
 class CBNDGameContext : public CLuaContext {
   
 private:
     
+    CWorldEntity * m_pPlayerEntity;
+    
+    bool m_bGameActive;
+    
 public:
     
-    bool GetBoolean( std::string );
+    CWorldEntity * GetPlayer() {
+        return m_pPlayerEntity;
+    }
     
+    CWorldEntity * CreateEntity_Player( float, float );
+    
+    bool GetBoolean( std::string );
     void Initialize();
+    
+    void Think();
     
     
 };
