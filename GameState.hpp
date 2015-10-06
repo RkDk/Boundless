@@ -16,9 +16,9 @@ class CGameState : public CState< CBNDGameContext > {
 private:
     
     CGameInput m_GameInput;
-    
-    CTextureImage * m_pPlayerSprite;
+   
     CWorldEntity * m_pPlayer;
+    CGameVars * m_pGameVars;
     
 public:
     

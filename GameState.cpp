@@ -17,12 +17,15 @@ void CGameState::Init() {
 void CGameState::PostInit() {
     
     m_bPostInit = true;
-    
-    m_pPlayerSprite = nullptr;
     m_pPlayer = nullptr;
-
+    m_pGameVars = &m_pGameContext->GameVars();
+    
+    CWorldEntity * e = m_pGameContext->CreateEntity_Enemy( 600.0f, 300.0f );
+    e->SetScale( 8.0f, 8.0f );
+    
     m_pPlayer = m_pGameContext->CreateEntity_Player( 300.0f, 300.0f );
-    m_pPlayer->SetScale( 4.0f, 4.0f );
+    m_pPlayer->SetScale( 5.0f, 5.0f );
+    
 }
 
 void CGameState::OnStateSwitch() {
@@ -33,6 +36,42 @@ void CGameState::Input() {
     
     m_GameInput.Poll();
     auto eventType = m_GameInput.EventType();
+
+    if( m_GameInput.KeyDown( SDL_SCANCODE_W ) ) {
+        
+        m_pPlayer->SetMaterialToTexture( 3 );
+        m_pPlayer->Displace2( 0.0f, -m_pGameVars->m_PlayerYSpeed );
+    
+    }
+    
+    if( m_GameInput.KeyDown( SDL_SCANCODE_A ) ) {
+        
+        m_pPlayer->SetMaterialToTexture( 2 );
+        m_pPlayer->Displace2( -m_pGameVars->m_PlayerXSpeed, 0.0f );
+        
+    }
+    
+    if( m_GameInput.KeyDown( SDL_SCANCODE_S ) ) {
+    
+        m_pPlayer->SetMaterialToTexture( 0 );
+        m_pPlayer->Displace2( 0.0f, m_pGameVars->m_PlayerYSpeed );
+    
+    }
+    
+    if( m_GameInput.KeyDown( SDL_SCANCODE_D ) ) {
+    
+        m_pPlayer->SetMaterialToTexture( 1 );
+        m_pPlayer->Displace2( m_pGameVars->m_PlayerYSpeed, 0.0f );
+    
+    }
+    
+    if( m_GameInput.KeyDown( SDL_SCANCODE_J ) ) {
+        
+        Vector3< float > pos = m_pPlayer->GetPos();
+        m_pGameContext->CreateEntity_DamageBox( pos.GetX(), pos.GetY(), 100.0f, 100.0f, 100.0f, DMBSource::PLAYER );
+        
+    }
+
     
     if( eventType == SDL_QUIT ) {
         
@@ -53,20 +92,59 @@ void CGameState::Draw() {
     m_pGameContext->GraphicsContext()->ClearBuffer();
     
     static CTextureImage * ground = GetTexture( "data/textures/world/testground1.png" );
+    static CTextureImage * wall1 = GetTexture( "data/textures/world/testwall1.png" );
+    static CTextureImage * wall2 = GetTexture( "data/textures/world/testwall2.png" );
+    static CTextureImage * wall3 = GetTexture( "data/textures/world/testwall3.png" );
+    static CTextureImage * wall4 = GetTexture( "data/textures/world/testwall4.png" );
+    static CTextureImage * wall5 = GetTexture( "data/textures/world/testwall5.png" );
+    static CTextureImage * wall6 = GetTexture( "data/textures/world/testwall6.png" );
+    static CTextureImage * wall7 = GetTexture( "data/textures/world/testwall7.png" );
+
     
-   
     if( ground ) {
         
         for( int y = 0; y < 20; y++ ) {
             for( int x = 0; x < 20; x++ ) {
-                m_pGameContext->DrawContext()->DrawMaterial( *ground, x * 84, y * 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+                m_pGameContext->DrawContext()->DrawMaterial( *ground, x * 84 + 168, 168 + y * 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
             }
         }
         
         
     }
     
+    if( wall2 ) {
+        
+        for( int x = 0; x < 20; x++ ) {
+            m_pGameContext->DrawContext()->DrawMaterial( *wall2, 168 + x * 84, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+        }
+        
+    }
+    
+    if( wall1 ) {
+        
+        for( int x = 0; x < 20; x++ ) {
+            m_pGameContext->DrawContext()->DrawMaterial( *wall1, 168 + x * 84, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+        }
+        
+    }
+    
+    m_pGameContext->DrawContext()->DrawMaterial( *wall3, 0, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+    m_pGameContext->DrawContext()->DrawMaterial( *wall4, 84, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+    m_pGameContext->DrawContext()->DrawMaterial( *wall5, 0, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+    m_pGameContext->DrawContext()->DrawMaterial( *wall6, 84, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+    
+    if( wall7 ) {
+        
+        for( int x = 0; x < 20; x++ ) {
+            m_pGameContext->DrawContext()->DrawMaterial( *wall7, 84, 168 + 84 * x, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+            m_pGameContext->DrawContext()->DrawMaterial( *wall5, 0, 168 + 84 * x, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+        }
+        
+    }
+    
     m_pGameContext->EntityManager()->DrawAllEntities();
+    
+    m_pGameContext->DrawQuadTree();
     
     
     m_pGameContext->GraphicsContext()->SwapBuffers();

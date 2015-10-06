@@ -12,4 +12,13 @@
 #define DEFAULT_SCREEN_WIDTH 1024
 #define DEFAULT_SCREEN_HEIGHT 768
 
+enum ENTTYPE {
+
+    PLAYER = 0x01,
+    ENEMY = 0x02,
+    DAMAGE = 0x04
+    
+};
+
+
 #endif /* Define_h */
