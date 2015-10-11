@@ -18,6 +18,10 @@ void CBNDGameContext::Initialize() {
     
     LoadResources( "data/resources.res" );
     
+    m_pGraphicsContext->LoadShaderProgram( "data/shaders/shadowocclusion_vertex.v", "data/shaders/shadowocclusion_fragment.f" );
+    m_pGraphicsContext->LoadShaderProgram( "data/shaders/shadow_vertex.v", "data/shaders/shadow_fragment.f" );
+    
+    
     InitAllShaders();
     m_pGraphicsContext->UseShader( 0 );
     

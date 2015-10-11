@@ -20,6 +20,8 @@ private:
     CWorldEntity * m_pPlayer;
     CGameVars * m_pGameVars;
     
+    CFrameBufferObject m_ShadowOcclusionFBO, m_SceneFBO;
+    
 public:
     
     void Init();
