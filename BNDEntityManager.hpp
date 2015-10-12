@@ -10,9 +10,14 @@
 #define EntityManager_hpp
 
 #include "SoraIncludes.h"
+#include "DrawContext.h"
 
 class CBNDEntityManager : public CEntityManager {
     
+public:
+    
+    void DrawAllEntitiesShadowBase( CDrawContext * , CTextureImage * );
+    int DrawAllEntitiesAtDepthShadowBase( CDrawContext * , CTextureImage * , int );
 
 };
 

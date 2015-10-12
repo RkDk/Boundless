@@ -25,7 +25,7 @@ void main()
         float d = (  j / 256.0 ) * MAX_DIST;
     
         float x = .5 + ( cos( rayAngle ) * d );
-        float y = .5 + ( sin( rayAngle ) * d );
+        float y = .5 - ( sin( rayAngle ) * d );
         vec4 color = texture( texUnit2, vec2( x, y ) );
         outputColor = vec4( 1, 1, 1, 1 );
         

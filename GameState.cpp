@@ -22,8 +22,10 @@ void CGameState::PostInit() {
     
     m_ShadowOcclusionFBO.Init( 256, 1 );
     m_SceneFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
+    m_ShadowsFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
+
     
-    CWorldEntity * e = m_pGameContext->CreateEntity_Enemy( 600.0f, 300.0f );
+    CWorldEntity * e = m_pGameContext->CreateEntity_Enemy( 510.0f, 200.0f );
     e->SetScale( 8.0f, 8.0f );
     e->SetCollisionBodyToBoxSprite();
     e->UpdateSpatialTreeEntitySize();
@@ -106,9 +108,6 @@ void CGameState::Think() {
 
 void CGameState::Draw() {
     
-    m_SceneFBO.BeginDrawingToFBO();
-    
-    m_pGameContext->GraphicsContext()->ClearBuffer();
     
     static CTextureImage * pixel = GetTexture( "data/textures/pixel.png" );
     static CTextureImage * ground = GetTexture( "data/textures/world/testground1.png" );
@@ -119,136 +118,114 @@ void CGameState::Draw() {
     static CTextureImage * wall5 = GetTexture( "data/textures/world/testwall5.png" );
     static CTextureImage * wall6 = GetTexture( "data/textures/world/testwall6.png" );
     static CTextureImage * wall7 = GetTexture( "data/textures/world/testwall7.png" );
-/*
     
-    if( ground ) {
-        
-        for( int y = 0; y < 20; y++ ) {
-            for( int x = 0; x < 20; x++ ) {
-                m_pGameContext->DrawContext()->DrawMaterial( *ground, x * 84 + 168, 168 + y * 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-            }
-        }
-        
-        
-    }
     
-    if( wall2 ) {
-        
-        for( int x = 0; x < 20; x++ ) {
-            m_pGameContext->DrawContext()->DrawMaterial( *wall2, 168 + x * 84, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-        }
-        
-    }
+    m_SceneFBO.BeginDrawingToFBO();
     
-    if( wall1 ) {
-        
-        for( int x = 0; x < 20; x++ ) {
-            m_pGameContext->DrawContext()->DrawMaterial( *wall1, 168 + x * 84, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-        }
-        
-    }
+        m_pGameContext->GraphicsContext()->UseShader( 3 );
+        m_pGameContext->GraphicsContext()->ClearBuffer();
     
-    m_pGameContext->DrawContext()->DrawMaterial( *wall3, 0, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-    m_pGameContext->DrawContext()->DrawMaterial( *wall4, 84, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-    m_pGameContext->DrawContext()->DrawMaterial( *wall5, 0, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-    m_pGameContext->DrawContext()->DrawMaterial( *wall6, 84, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+        int l = glGetUniformLocation( m_pGameContext->GraphicsContext()->GetShaderIDFromIndex( 3 ), "texUnit2" );
+        glUniform1i( l, 1 );
     
-    if( wall7 ) {
-        
-        for( int x = 0; x < 20; x++ ) {
-            m_pGameContext->DrawContext()->DrawMaterial( *wall7, 84, 168 + 84 * x, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-            m_pGameContext->DrawContext()->DrawMaterial( *wall5, 0, 168 + 84 * x, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-        }
-        
-    }*/
-    
-    m_pGameContext->EntityManager()->DrawAllEntities();
+        m_pGameContext->EntityManager()->DrawAllEntitiesShadowBase( m_pGameContext->DrawContext(), pixel );
     
     m_SceneFBO.EndDrawingToFBO();
     
-    m_pGameContext->GraphicsContext()->UseShader( 0 );
     m_ShadowOcclusionFBO.BeginDrawingToFBO();
+    
     m_pGameContext->GraphicsContext()->ClearBuffer();
-    m_pGameContext->GraphicsContext()->UseShader( 1 );
+        m_pGameContext->GraphicsContext()->UseShader( 1 );
     
-    glActiveTexture( GL_TEXTURE1 );
-    m_SceneFBO.BindTexture();
+        glActiveTexture( GL_TEXTURE1 );
+        m_SceneFBO.BindTexture();
     
-    int l = glGetUniformLocation( m_pGameContext->GraphicsContext()->GetShaderIDFromIndex( 1 ), "texUnit2" );
-    glUniform1i( l, 1 );
+        l = glGetUniformLocation( m_pGameContext->GraphicsContext()->GetShaderIDFromIndex( 1 ), "texUnit2" );
+        glUniform1i( l, 1 );
     
-    glActiveTexture( GL_TEXTURE0 );
+        glActiveTexture( GL_TEXTURE0 );
         m_pGameContext->DrawContext()->DrawMaterial( *pixel, 0.0f, 767.0f, 256.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f );
     m_ShadowOcclusionFBO.EndDrawingToFBO();
     
-    m_pGameContext->GraphicsContext()->ClearBuffer();
-    
-    m_pGameContext->GraphicsContext()->UseShader( 0 );
-
     m_SceneFBO.BeginDrawingToFBO();
     
-    m_pGameContext->GraphicsContext()->ClearBuffer();
-     
-     if( ground ) {
-     
-     for( int y = 0; y < 20; y++ ) {
-     for( int x = 0; x < 20; x++ ) {
-     m_pGameContext->DrawContext()->DrawMaterial( *ground, x * 84 + 168, 168 + y * 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-     }
-     }
-     
-     
-     }
-     
-     if( wall2 ) {
-     
-     for( int x = 0; x < 20; x++ ) {
-     m_pGameContext->DrawContext()->DrawMaterial( *wall2, 168 + x * 84, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-     }
-     
-     }
-     
-     if( wall1 ) {
-     
-     for( int x = 0; x < 20; x++ ) {
-     m_pGameContext->DrawContext()->DrawMaterial( *wall1, 168 + x * 84, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-     }
-     
-     }
-     
-     m_pGameContext->DrawContext()->DrawMaterial( *wall3, 0, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-     m_pGameContext->DrawContext()->DrawMaterial( *wall4, 84, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-     m_pGameContext->DrawContext()->DrawMaterial( *wall5, 0, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-     m_pGameContext->DrawContext()->DrawMaterial( *wall6, 84, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-     
-     if( wall7 ) {
-     
-     for( int x = 0; x < 20; x++ ) {
-     m_pGameContext->DrawContext()->DrawMaterial( *wall7, 84, 168 + 84 * x, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-     m_pGameContext->DrawContext()->DrawMaterial( *wall5, 0, 168 + 84 * x, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
-     }
-     
-     }
-    
-    
-    
+        m_pGameContext->GraphicsContext()->UseShader( 0 );
+        m_pGameContext->GraphicsContext()->ClearBuffer();
+         
+         if( ground ) {
+         
+             for( int y = 0; y < 20; y++ ) {
+                 for( int x = 0; x < 20; x++ ) {
+                    m_pGameContext->DrawContext()->DrawMaterial( *ground, x * 84 + 168, 168 + y * 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+                 }
+             }
+         
+         }
+         
+         if( wall2 ) {
+             for( int x = 0; x < 20; x++ ) {
+                m_pGameContext->DrawContext()->DrawMaterial( *wall2, 168 + x * 84, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+             }
+         }
+         
+         if( wall1 ) {
+             for( int x = 0; x < 20; x++ ) {
+                m_pGameContext->DrawContext()->DrawMaterial( *wall1, 168 + x * 84, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+             }
+         }
+         
+         m_pGameContext->DrawContext()->DrawMaterial( *wall3, 0, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+         m_pGameContext->DrawContext()->DrawMaterial( *wall4, 84, 0, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+         m_pGameContext->DrawContext()->DrawMaterial( *wall5, 0, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+         m_pGameContext->DrawContext()->DrawMaterial( *wall6, 84, 84, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+         
+         if( wall7 ) {
+         
+             for( int x = 0; x < 20; x++ ) {
+                m_pGameContext->DrawContext()->DrawMaterial( *wall7, 84, 168 + 84 * x, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+                 m_pGameContext->DrawContext()->DrawMaterial( *wall5, 0, 168 + 84 * x, 84, 84, 1.0f, 1.0f, 1.0f, 1.0f );
+             }
+         }
     m_SceneFBO.EndDrawingToFBO();
+
+    glClearColor( .1f, .1f, .1f, 0.0f );
     
-    m_pGameContext->GraphicsContext()->UseShader( 2 );
+    m_ShadowsFBO.BeginDrawingToFBO();
+        m_pGameContext->GraphicsContext()->ClearBuffer();
+        
+        m_pGameContext->GraphicsContext()->UseShader( 2 );
+        
+        glActiveTexture( GL_TEXTURE1 );
+        m_ShadowOcclusionFBO.BindTexture();
+        
+        l = glGetUniformLocation( m_pGameContext->GraphicsContext()->GetShaderIDFromIndex( 2 ), "texUnit2" );
+        glUniform1i( l, 1 );
+        
+        glActiveTexture( GL_TEXTURE0 );
+        m_pGameContext->DrawContext()->DrawMaterial( *pixel, 0, 0, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, 1.0f, 1.0f, 1.0f, 1.0f );
+    m_ShadowsFBO.EndDrawingToFBO();
+
+    glClearColor( .1f, .1f, .1f, 1.0f );
+    
+    m_pGameContext->GraphicsContext()->ClearBuffer();
+    
+    m_pGameContext->GraphicsContext()->UseShader( 4 );
     
     glActiveTexture( GL_TEXTURE1 );
-    m_ShadowOcclusionFBO.BindTexture();
+    m_ShadowsFBO.BindTexture();
     
-    l = glGetUniformLocation( m_pGameContext->GraphicsContext()->GetShaderIDFromIndex( 2 ), "texUnit2" );
+    l = glGetUniformLocation( m_pGameContext->GraphicsContext()->GetShaderIDFromIndex( 4 ), "texUnit2" );
     glUniform1i( l, 1 );
     
     glActiveTexture( GL_TEXTURE0 );
+    
     m_SceneFBO.DrawTexture( m_pGameContext->DrawContext() );
     
     m_pGameContext->GraphicsContext()->UseShader( 0 );
     
     m_pGameContext->EntityManager()->DrawAllEntities();
     
+    /*
     
     CMatrix< float > mat;
     mat.Identity();
@@ -256,7 +233,7 @@ void CGameState::Draw() {
     mat.Translate( 0.0f, m_ShadowOcclusionFBO.GetHeight() + 30.0f, 0.0f );
     m_ShadowOcclusionFBO.DrawTexture( m_pGameContext->DrawContext(), &mat );
     
-    
+    */
     //m_pGameContext->DrawQuadTree();
     
     

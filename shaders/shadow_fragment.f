@@ -42,18 +42,17 @@ void main()
     float coordx = angleFromCenter / range;
     vec4 shadowColor = texture( texUnit2, vec2( coordx, 0 ) );
     
-    float mul = 1.5;
-
-    if( dist > .3 )
-        mul = .4;
-
+    float mul = 1 - dist * 1.5;
+    
+    if( dist < .1 )
+        mul = mul + ( .1 - dist ) * 10;
     
     if( dist > shadowColor.r ) {
         float oldmul = mul;
-        mul = dist * 1.2;
+        mul = dist * .9;
         if( oldmul < mul )
             mul = oldmul;
-    }
+    } 
 
     outputColor = texture( texUnit, textureCoord ) * textureColor * mul;
 

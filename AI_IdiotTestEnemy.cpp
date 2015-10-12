@@ -48,7 +48,7 @@ void CAI_IdiotTestEnemy::Think() {
             
         }
         
-        m_pTargetEntity->Displace2( m_Speed.GetX(), m_Speed.GetY() );
+        //m_pTargetEntity->Displace2( m_Speed.GetX(), m_Speed.GetY() );
         
     }
     
