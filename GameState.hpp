@@ -19,8 +19,8 @@ private:
    
     CWorldEntity * m_pPlayer;
     CGameVars * m_pGameVars;
-    
-    CFrameBufferObject m_ShadowsFBO, m_ShadowOcclusionFBO, m_SceneFBO;
+    CLevel testLevel;
+    CFrameBufferObject m_ShadowsFBO, m_ShadowOcclusionFBO, m_SceneFBO, m_LightsFBO;
     
 public:
     

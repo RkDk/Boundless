@@ -22,6 +22,9 @@ void CBNDGameContext::Initialize() {
     m_pGraphicsContext->LoadShaderProgram( "data/shaders/shadow_vertex.v", "data/shaders/shadow_fragment.f" );
     m_pGraphicsContext->LoadShaderProgram( "data/shaders/shadowbase_vertex.v", "data/shaders/shadowbase_fragment.f" );
     m_pGraphicsContext->LoadShaderProgram( "data/shaders/shadowscene_vertex.v", "data/shaders/shadowscene_fragment.f" );
+    m_pGraphicsContext->LoadShaderProgram( "data/shaders/lights_vertex.v", "data/shaders/lights_fragment.f" );
+    //m_pGraphicsContext->LoadShaderProgram( "data/shaders/shadowveil_vertex.v", "data/shaders/shadowveil_fragment.f" );
+    
     
     
     InitAllShaders();

@@ -6,6 +6,7 @@ smooth in vec4 textureColor;
 
 uniform sampler2D texUnit;
 uniform sampler2D texUnit2;
+uniform vec2 lightPos;
 
 out vec4 outputColor;
 
@@ -29,8 +30,8 @@ float atan2(in float y, in float x)
 void main()
 {
 
-    float dist = distance( textureCoord, vec2( .5, .5 ) );
-    float angleFromCenter = atan2( textureCoord.y - .5, textureCoord.x - .5 );
+    float dist = distance( textureCoord, vec2( lightPos.x, lightPos.y ) );
+    float angleFromCenter = atan2( textureCoord.y - lightPos.y, textureCoord.x - lightPos.x );
     float range = 2.0 * PI;
     
     if( angleFromCenter < 0.0 ) {
@@ -42,19 +43,21 @@ void main()
     float coordx = angleFromCenter / range;
     vec4 shadowColor = texture( texUnit2, vec2( coordx, 0 ) );
     
-    float mul = 1 - dist * 1.5;
+    //float mul = 1 - dist * 1;
     
-    if( dist < .1 )
-        mul = mul + ( .1 - dist ) * 10;
+    //if( dist < .1 )
+    //    mul = mul + ( .1 - dist ) * 10;
+    
+    float mul = 1;
     
     if( dist > shadowColor.r ) {
         float oldmul = mul;
-        mul = dist * .9;
+        mul = dist * 1.2;
         if( oldmul < mul )
             mul = oldmul;
     } 
 
-    outputColor = texture( texUnit, textureCoord ) * textureColor * mul;
+    outputColor = texture( texUnit, textureCoord ) * textureColor * ( mul * 2 );
 
 }
 

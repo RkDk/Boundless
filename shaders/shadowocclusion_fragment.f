@@ -6,10 +6,11 @@ smooth in vec4 textureColor;
 
 uniform sampler2D texUnit;
 uniform sampler2D texUnit2;
+uniform vec2 lightPos;
 
 out vec4 outputColor;
 
-#define MAX_DIST .3
+#define MAX_DIST .7
 
 void main()
 {
@@ -24,14 +25,14 @@ void main()
     
         float d = (  j / 256.0 ) * MAX_DIST;
     
-        float x = .5 + ( cos( rayAngle ) * d );
-        float y = .5 - ( sin( rayAngle ) * d );
+        float x = lightPos.x + ( cos( rayAngle ) * d );
+        float y = ( 1 - lightPos.y ) - ( sin( rayAngle ) * d );
         vec4 color = texture( texUnit2, vec2( x, y ) );
         outputColor = vec4( 1, 1, 1, 1 );
         
         if( color.r > .1 ) {
             
-            float dist = distance( vec2( x, y ), vec2( .5, .5 ) );
+            float dist = distance( vec2( x, y ), vec2( lightPos.x, ( 1 - lightPos.y ) ) );
             float c = dist;
             outputColor = vec4( c, c, c, 1 );
             return;
