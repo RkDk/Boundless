@@ -38,7 +38,6 @@ int CBNDEntityManager::DrawAllEntitiesAtDepthShadowBase( CDrawContext * pDrawCon
         glActiveTexture( GL_TEXTURE1 );
         CSprite spr = e->GetSprite();
         spr.BindFrame( 0 );
-        
         glActiveTexture( GL_TEXTURE0 );
 
         pDrawContext->DrawMaterial( *pixImage, pos.GetX(), pos.GetY(), size.GetX(), size.GetY(), 1.0f, 0.0f, 0.0f, 1.0f );

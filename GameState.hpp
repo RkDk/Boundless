@@ -10,6 +10,7 @@
 #define GameState_hpp
 
 #include "BNDGameContext.hpp"
+#include "LightSpot.hpp"
 
 class CGameState : public CState< CBNDGameContext > {
   
@@ -20,7 +21,11 @@ private:
     CWorldEntity * m_pPlayer;
     CGameVars * m_pGameVars;
     CLevel testLevel;
-    CFrameBufferObject m_ShadowsFBO, m_ShadowOcclusionFBO, m_SceneFBO, m_LightsFBO;
+    CFrameBufferObject m_ShadowObjectsFBO, m_ShadowOcclusionFBO, m_DynamicShadowFBO, m_DynamicShadowCopyFBO, m_AmbientLightingFBO, m_EntityFBO, m_SceneFBO;
+    
+    std::vector< CLightSpot > m_LightSpots;
+    
+    //CFrameBufferObject m_ShadowsFBO, m_ShadowOcclusionFBO, m_SceneFBO, m_LightsFBO;
     
 public:
     

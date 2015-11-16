@@ -13,7 +13,7 @@ void CBNDGameContext::Initialize() {
     m_bGameActive = true;
     m_pPlayerEntity = nullptr;
     
-    m_Quadtree.CreateTree( 0, 0, 1024, 0 );
+    m_Quadtree.CreateTree( 0, 0, DEFAULT_SCREEN_WIDTH, 0 );
     m_CollisionCallback.SetContext( this );
     
     LoadResources( "data/resources.res" );

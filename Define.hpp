@@ -11,6 +11,7 @@
 
 #define DEFAULT_SCREEN_WIDTH 1024
 #define DEFAULT_SCREEN_HEIGHT 768
+#define SET_DEFAULT_CLEARCOLOR() glClearColor( .1f, .1f, .1f, 1.0f )
 
 enum ENTTYPE {
 
