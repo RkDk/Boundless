@@ -10,19 +10,19 @@ uniform vec2 lightPos;
 
 out vec4 outputColor;
 
-#define MAX_DIST .7
+#define MAX_DIST 1.5
 
 void main()
 {
 
     const float RAD2DEG = 57.2957;
-    const float PI = 3.14159;
+    const double PI = 3.14159265359;
     const float DEG2RAD = .0174532;
     const int numLoops = 256;
     const float loopMul = 1.0 / float( numLoops );
     
     //Determine ray angle as a radian in range [0:2pi]
-    float rayAngle = textureCoord.x * ( 2.0 * PI );
+    float rayAngle = float( double( textureCoord.x ) * ( 2.0 * PI ) );
     outputColor = vec4( 1, 1, 1, 1 );
     
     for( int j = 0; j < numLoops; j++ ) {

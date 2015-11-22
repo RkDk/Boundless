@@ -34,7 +34,7 @@ public:
         return m_WorldPos;
     }
     
-    const Vector4< float > GetColor() {
+    const Vector4< float > & GetColor() {
         return m_Color;
     }
     

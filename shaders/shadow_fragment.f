@@ -23,12 +23,16 @@ float atan2(in float y, in float x) {
 void main()
 {
 
-    //The maximum distance to consider drawing a shadow for an occluded pixel
-    const float MAX_DIST = 1200.0;
     const float range = 2.0 * PI;
     
     //Get current pixel's color
     vec4 color = texture( texUnit, textureCoord );
+    
+   if( color.a < 1 ) {
+    
+        color = vec4( 1 );
+    
+    }
     
     //Distance of current pixel from light origin
     float dist = distance( textureCoord, vec2( lightPos.x, lightPos.y ) );
@@ -53,7 +57,9 @@ void main()
     //    mul = mul + ( .1 - dist ) * 10;
     
     float mul = 1;
-
+    
+    outputColor = color;
+    
     //Shadow's red color is distance where the shadow starts; check to see if current pixel is in shadow
     if( dist > shadowColor.r ) {
         
@@ -61,18 +67,21 @@ void main()
         //mul = dist * 1.2;
         //if( oldmul < mul )
             //mul = oldmul;
-    
+            
+        float shade = min( .65 + ( dist - .5 ), 1 );
+        int ishade = int( shade * 12 );
+        shade = float( ishade ) * .083;
+
         //Check to see if we're casting a shadow over an already lit pixel
-        if( color.r > 0 ) {
+        if( color.r > 0 && color.r > shade ) {
         
-            outputColor = vec4( .65, .65, .65, 1 );
+            outputColor = vec4( shade, shade, shade, 1 );
         
-        } else
-            outputColor = vec4( 0, 0, 0, 1 );
+        } 
        
         
     } else {
-    
+    /*
         //Otherwise, we're in a lit pixel.  Check to see if this lit pixel casts over a different light's shadow
         if( color.r < 1 && color.a > 0 ) {
         
@@ -87,7 +96,7 @@ void main()
     
         }
         
-    
+    */
     
     }
 

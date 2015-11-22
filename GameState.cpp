@@ -26,6 +26,7 @@ void CGameState::PostInit() {
     m_DynamicShadowFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     m_DynamicShadowCopyFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     m_AmbientLightingFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
+    m_AmbientLightingCopyFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     m_EntityFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     m_SceneFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     
@@ -43,10 +44,10 @@ void CGameState::PostInit() {
     m_pPlayer->UpdateSpatialTreeEntitySize();
     
 
-    for( int j = 0; j < 4; j++ ) {
+    for( int j = 0; j < 3; j++ ) {
         CLightSpot l;
-        l.SetColor( 1.0f, 1.0f, 1.0f, 1.0f );
-        l.SetWorldPos( j * 300.0f, 10.0f );
+        l.SetColor( ( float )Util::RandomNumber( 100, 255 ) / 255.0f, ( float )Util::RandomNumber( 100, 255 ) / 255.0f, ( float )Util::RandomNumber( 100, 255 ) / 255.0f, 1.0f );
+        l.SetWorldPos( j * 400.0f, 10.0f );
     m_LightSpots.push_back( l );
     }
     
@@ -133,6 +134,8 @@ void CGameState::Draw() {
     //Clear any FBOs as necessary
     m_DynamicShadowFBO.Clear();
     m_DynamicShadowCopyFBO.Clear();
+    m_AmbientLightingFBO.Clear();
+    m_AmbientLightingCopyFBO.Clear();
     
     //Render all objects that will cast a shadow onto FBO.
     m_ShadowObjectsFBO.BeginDrawingToFBO();
@@ -148,6 +151,7 @@ void CGameState::Draw() {
     for( auto iter : m_LightSpots ) {
         
         Vector2< float > lPos( iter.GetWorldPos() );
+        Vector4< float > lColor( iter.GetColor() );
         
         lPos.Set( lPos.GetX() / DEFAULT_SCREEN_WIDTH, lPos.GetY() / DEFAULT_SCREEN_HEIGHT );
         
@@ -201,8 +205,33 @@ void CGameState::Draw() {
             m_pGameContext->GraphicsContext()->UseShader( 0 );
             m_DynamicShadowFBO.DrawTexture( m_pGameContext->DrawContext() );
         m_DynamicShadowCopyFBO.EndDrawingToFBO();
+      
+        m_AmbientLightingFBO.BeginDrawingToFBO();
+        {
+            glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+            glClear( GL_COLOR_BUFFER_BIT );
+            
+            m_pGameContext->GraphicsContext()->UseShader( 5 );
+            
+            int l = m_pGameContext->GraphicsContext()->GetShaderUniformLocation( 5, "lightPos" );
+            glUniform2f( l, lPos.GetX(), lPos.GetY() );
+            
+            m_pGameContext->DrawContext()->SetDrawColor( lColor.GetX(), lColor.GetY(), lColor.GetZ(), lColor.GetW() );
+            
+            glActiveTexture( GL_TEXTURE0 );
+            m_AmbientLightingCopyFBO.DrawTexture( m_pGameContext->DrawContext() );
+            
+        }
+        m_AmbientLightingFBO.EndDrawingToFBO();
+
+        m_pGameContext->DrawContext()->SetDrawColor( 1.0f, 1.0f, 1.0f, 1.0f );
         
-        //TODO: Draw ambient lighting
+        
+        m_AmbientLightingCopyFBO.BeginDrawingToFBO();
+            m_pGameContext->GraphicsContext()->UseShader( 0 );
+            m_AmbientLightingFBO.DrawTexture( m_pGameContext->DrawContext() );
+        m_AmbientLightingCopyFBO.EndDrawingToFBO();
+        
         
     }
     
@@ -229,6 +258,10 @@ void CGameState::Draw() {
         
         m_pGameContext->GraphicsContext()->UseShader( 4 );
         
+        
+        glActiveTexture( GL_TEXTURE3 );
+        m_AmbientLightingFBO.BindTexture();
+        
         glActiveTexture( GL_TEXTURE2 );
         m_DynamicShadowFBO.BindTexture();
         
@@ -239,6 +272,8 @@ void CGameState::Draw() {
         glUniform1i( l, 1 );
         l = glGetUniformLocation( m_pGameContext->GraphicsContext()->GetShaderIDFromIndex( 4 ), "shadowTex" );
         glUniform1i( l, 2 );
+        l = glGetUniformLocation( m_pGameContext->GraphicsContext()->GetShaderIDFromIndex( 4 ), "lightingTex" );
+        glUniform1i( l, 3 );
         
         glActiveTexture( GL_TEXTURE0 );
         
