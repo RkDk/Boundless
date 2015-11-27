@@ -30,6 +30,12 @@ void CGameState::PostInit() {
     m_EntityFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     m_SceneFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     
+    m_levelEditor.SetLevel( &testLevel );
+    m_levelEditor.SetWindowSize( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
+    m_levelEditor.SetPixelImage( GetTexture( "data/textures/pixel.png" ) );
+    m_levelEditor.NewTileMenu( m_pGameContext->TextureFactory(), "Textures", "data/textures/world/" );
+    m_levelEditor.Toggle();
+    
     //m_ShadowsFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     //m_LightsFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     
@@ -44,14 +50,31 @@ void CGameState::PostInit() {
     m_pPlayer->UpdateSpatialTreeEntitySize();
     
 
-    for( int j = 0; j < 3; j++ ) {
-        CLightSpot l;
-        l.SetColor( ( float )Util::RandomNumber( 100, 255 ) / 255.0f, ( float )Util::RandomNumber( 100, 255 ) / 255.0f, ( float )Util::RandomNumber( 100, 255 ) / 255.0f, 1.0f );
-        l.SetWorldPos( j * 400.0f, 10.0f );
-    m_LightSpots.push_back( l );
-    }
+    //for( int j = 0; j < 3; j++ ) {
+      //  CLightSpot l;
+       // l.SetColor( ( float )Util::RandomNumber( 100, 255 ) / 255.0f, ( float )Util::RandomNumber( 100, 255 ) / 255.0f, ( float )Util::RandomNumber( 100, 255 ) / 255.0f, 1.0f );
+    //    l.SetWorldPos( j * 400.0f, 10.0f );
+    //m_LightSpots.push_back( l );
+   // }
     
-    testLevel.Load( "data/level.txt", m_pGameContext->TextureFactory() );
+    CLightSpot l1;
+    
+    l1.SetColor( 0.7f, 0.7f, 0.7f, 1.0f );
+    l1.SetWorldPos( 100.0f, 100.0f );
+    m_LightSpots.push_back( l1 );
+
+    CLightSpot l2;
+    
+    l2.SetColor( 1.0f, 0.5f, 0.5f, 1.0f );
+    l2.SetWorldPos( 900.0f, 100.0f );
+    m_LightSpots.push_back( l2 );
+    CLightSpot l3;
+    
+    l3.SetColor( 0.1f, 0.75f, 0.75f, 1.0f );
+    l3.SetWorldPos( 0.0f, 0.0f );
+    m_LightSpots.push_back( l3 );
+    testLevel.Load( "data/templevel.txt", m_pGameContext->TextureFactory() );
+    //testLevel.Save( "data/templevel.txt" );
     
 }
 
@@ -64,6 +87,8 @@ void CGameState::Input() {
     m_GameInput.Poll();
     auto eventType = m_GameInput.EventType();
 
+    m_levelEditor.Input( &m_GameInput );
+    
     if( m_GameInput.KeyDown( SDL_SCANCODE_W ) ) {
         
         m_pPlayer->SetMaterialToTexture( 3 );
@@ -101,6 +126,12 @@ void CGameState::Input() {
 
     if( m_GameInput.EventType() == SDL_KEYDOWN ) {
         
+        if( m_GameInput.KeyDownOnce( SDLK_p ) ) {
+            
+            m_levelEditor.Toggle();
+            
+        }
+        
         if( m_GameInput.KeyDownOnce( SDLK_ESCAPE ) ) {
             
             m_bContinue = false;
@@ -125,6 +156,12 @@ void CGameState::Think() {
 }
 
 void CGameState::Draw() {
+    
+    int mx, my;
+    
+    SDL_GetMouseState( &mx, &my );
+    
+    m_LightSpots[2].SetWorldPos( mx, my );
     
     static CTextureImage * pixel = GetTexture( "data/textures/pixel.png" );
     
@@ -280,6 +317,9 @@ void CGameState::Draw() {
         m_SceneFBO.DrawTexture( m_pGameContext->DrawContext() );
         
     }
+    
+    m_pGameContext->GraphicsContext()->UseShader( 0 );
+    m_levelEditor.Draw( m_pGameContext->DrawContext() );
     
     m_pGameContext->GraphicsContext()->SwapBuffers();
     

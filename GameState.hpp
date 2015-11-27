@@ -21,6 +21,7 @@ private:
     CWorldEntity * m_pPlayer;
     CGameVars * m_pGameVars;
     CLevel testLevel;
+    CLevelEditor m_levelEditor;
     CFrameBufferObject m_ShadowObjectsFBO, m_ShadowOcclusionFBO, m_DynamicShadowFBO, m_DynamicShadowCopyFBO, m_AmbientLightingFBO, m_EntityFBO, m_SceneFBO, m_AmbientLightingCopyFBO;
     
     std::vector< CLightSpot > m_LightSpots;
