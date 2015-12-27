@@ -8,12 +8,16 @@
 
 #include "BNDGameContext.hpp"
 
+void CBNDLevelEditorCallback::HandleEntityCreation( CLevelEntityInfo & e ) {
+    
+}
+
 void CBNDGameContext::Initialize() {
     
     m_bGameActive = true;
     m_pPlayerEntity = nullptr;
     
-    m_Quadtree.CreateTree( 0, 0, DEFAULT_SCREEN_WIDTH, 0 );
+    m_Quadtree.CreateTree( 0, 0, DEFAULT_SCREEN_WIDTH * 4, 0 );
     m_CollisionCallback.SetContext( this );
     
     LoadResources( "data/resources.res" );
@@ -25,16 +29,49 @@ void CBNDGameContext::Initialize() {
     m_pGraphicsContext->LoadShaderProgram( "data/shaders/lights_vertex.v", "data/shaders/lights_fragment.f" );
     //m_pGraphicsContext->LoadShaderProgram( "data/shaders/shadowveil_vertex.v", "data/shaders/shadowveil_fragment.f" );
     
+    //Init camera
+    float xoffset = 0.35f;
+    float yoffset = 0.35f;
+    m_GameCamera.SetCameraType( CAMTYPE::BOX );
+    m_GameCamera.SetBoxBounds( DEFAULT_SCREEN_WIDTH * xoffset, DEFAULT_SCREEN_HEIGHT * yoffset, DEFAULT_SCREEN_WIDTH * ( 1.0f - xoffset ), DEFAULT_SCREEN_HEIGHT * ( 1.0f - yoffset ) );
     
+    //Set relevant level pointers and refs
+    m_LevelEditorCallback.SetGameContext( this );
+    m_GameLevel.SetEditorCallback( &m_LevelEditorCallback );
+    m_LevelEditor.SetLevel( &m_GameLevel );
+    m_LevelEditor.SetCamera( &m_GameCamera );
+    
+    //Init level editor
+    m_LevelEditor.SetWindowSize( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
+    m_LevelEditor.SetPixelImage( GetTexture( "data/textures/pixel.png" ) );
+    m_LevelEditor.NewTileMenu( TextureFactory(), "Textures", "data/textures/world/Ch1Tiles/" );
     
     InitAllShaders();
     m_pGraphicsContext->UseShader( 0 );
     
 }
 
+void CBNDGameContext::LoadLevel( std::string path ) {
+ 
+    m_GameLevel.Load( path, TextureFactory() );
+    m_GameLevel.UpdateSpatialTree( &m_Quadtree );
+    
+    
+}
+
+void CBNDGameContext::DrawLevel() {
+    
+    m_GameLevel.Draw( m_pDrawContext );
+    
+}
+
 bool CBNDGameContext::GetBoolean( std::string name ) {
     
     return false;
+    
+}
+
+void CBNDGameContext::CreateLightSpot( float x, float y, int r, int g, int b ) {
     
 }
 
@@ -62,13 +99,14 @@ void CBNDGameContext::Think() {
         m_Quadtree.Think();
         
         UpdateAllEntities();
-        
         m_CollisionEngine.CheckForQuadTreeCollisions( &m_Quadtree, &m_CollisionCallback );
         
     }
     
     m_pEntityManager->RemoveAllDeletedEntities();
     m_pEntityManager->AddAllQueuedEntities();
+    
+    m_GameCamera.Think();
     
     
 }
@@ -140,18 +178,36 @@ CEnt_DamageBox * CBNDGameContext::CreateEntity_DamageBox( float x, float y, floa
     
 }
 
-void CBNDGameContext::HandleEntityContact( void * pEntA, int entTypeA, void * pEntB, int entTypeB ) {
+void CBNDGameContext::HandleEntityContact( void * pEntA, int entTypeA, void * pEntB, int entTypeB, CCollisionInfo * pData ) {
+    
     
     CWorldEntity * entA = static_cast< CWorldEntity * >( pEntA );
-    
+    /*
     m_pEntityManager->DeleteEntity( entA );
+    */
+    
+    if( entTypeB & ENTTYPE::WALL ) {
+        
+        Vector3< float > offset = pData->minTransAxis * pData->minTransDist;
+        entA->Displace( offset.GetX(), offset.GetY() );
+        
+        
+    }
+    
+}
+
+void CBNDGameContext::DrawLevelEditor() {
+    
+    m_LevelEditor.Draw( m_pDrawContext );
     
 }
 
 void CBNDGameContext::DrawQuadTree() {
     
+    Vector2< float > pos = m_GameCamera.GetTranslate();
+    
     m_pDrawContext->SetTexture( GetTexture( "data/textures/pixel.png" )->GetFrame( 0 ).GetTexture() );
-    m_Quadtree.Draw( m_pGraphicsContext->GetDrawContext() );
+    m_Quadtree.Draw( m_pGraphicsContext->GetDrawContext(), pos.GetX(), pos.GetY() );
 
 }
 

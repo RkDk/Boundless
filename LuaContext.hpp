@@ -12,6 +12,10 @@
 #include "BNDEntityManager.hpp"
 
 class CLuaContext : public CGameContext< CBNDEntityManager > {
+  
+public:
+    
+    virtual void CreateLightSpot( float, float, int, int, int ) = 0;
     
 };
 

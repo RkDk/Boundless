@@ -16,19 +16,19 @@ void CCollisionCallback::BeginContact( CCollisionContact & pCollisionContact ) {
     
     CEntity * entities[] = { entityA, entityB };
     
+    CEntity * mainEnt = nullptr;
+    CEntity * subEnt = nullptr;
+    
     int entityTypeA = entityA->GetClassTypeID();
     int entityTypeB = entityB->GetClassTypeID();
     int entityTypes = ( entityTypeA | entityTypeB );
-
+    
+    bool doCallBack = false;
     
     if( entityTypes & ENTTYPE::DAMAGE && entityTypes & ENTTYPE::ENEMY ) {
-        std::stringstream ss;
-        ss << entityTypes;
-        Log::Log( ss.str());
-        Log::Log( "COLLISION");
-        
-        CEntity * mainEnt = nullptr;
-        CEntity * subEnt = nullptr;
+
+        mainEnt = nullptr;
+        subEnt = nullptr;
         
         if( entityTypeA & ENTTYPE::DAMAGE ) {
             mainEnt = entityB;
@@ -38,10 +38,22 @@ void CCollisionCallback::BeginContact( CCollisionContact & pCollisionContact ) {
             subEnt = entityB;
         }
         
+        doCallBack = true;
         
-        m_pContext->HandleEntityContact( mainEnt, mainEnt->GetClassTypeID(), subEnt, subEnt->GetClassTypeID() );
         
     }
+    
+    if( entityTypes & ENTTYPE::WALL || entityTypes & ENTTYPE::WALL ) {
+        
+        mainEnt = ( entityTypeA & ENTTYPE::WALL )? entityB : entityA;
+        subEnt = ( entityTypeB & ENTTYPE::WALL ) ? entityB : entityA;
+        
+        doCallBack = true;
+        
+    }
+    
+    if( doCallBack )
+        m_pContext->HandleEntityContact( mainEnt, mainEnt->GetClassTypeID(), subEnt, subEnt->GetClassTypeID(), pCollisionContact.GetCollisionInfo() );
     
     
 }

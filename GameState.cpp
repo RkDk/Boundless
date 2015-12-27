@@ -30,23 +30,25 @@ void CGameState::PostInit() {
     m_EntityFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     m_SceneFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     
+    /*
     m_levelEditor.SetLevel( &testLevel );
+    m_levelEditor.SetCamera( &m_Camera );
     m_levelEditor.SetWindowSize( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     m_levelEditor.SetPixelImage( GetTexture( "data/textures/pixel.png" ) );
-    m_levelEditor.NewTileMenu( m_pGameContext->TextureFactory(), "Textures", "data/textures/world/" );
+    m_levelEditor.NewTileMenu( m_pGameContext->TextureFactory(), "Textures", "data/textures/world/Ch1Tiles/" );
     m_levelEditor.Toggle();
-    
+    */
     //m_ShadowsFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     //m_LightsFBO.Init( DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT );
     
-    CWorldEntity * e = m_pGameContext->CreateEntity_Enemy( 510.0f, 200.0f );
-    e->SetScale( 8.0f, 8.0f );
-    e->SetCollisionBodyToBoxSprite();
-    e->UpdateSpatialTreeEntitySize();
+   // CWorldEntity * e = m_pGameContext->CreateEntity_Enemy( 510.0f, 200.0f );
+   // e->SetScale( 8.0f, 8.0f );
+   // e->SetCollisionBodyToBoxSprite();
+   // e->UpdateSpatialTreeEntitySize();
     
-    m_pPlayer = m_pGameContext->CreateEntity_Player( 300.0f, 300.0f );
+    m_pPlayer = m_pGameContext->CreateEntity_Player( 0.0f, 360.0f );
     m_pPlayer->SetScale( 5.0f, 5.0f );
-    m_pPlayer->SetCollisionBodyToBoxSprite();
+    m_pPlayer->SetCollisionBodyToBoxSpritePercentOffsetFromBottom( 1.0f, 0.4f );
     m_pPlayer->UpdateSpatialTreeEntitySize();
     
 
@@ -59,22 +61,31 @@ void CGameState::PostInit() {
     
     CLightSpot l1;
     
-    l1.SetColor( 0.7f, 0.7f, 0.7f, 1.0f );
-    l1.SetWorldPos( 100.0f, 100.0f );
+    l1.SetColor( 0.6f, 0.6f, 0.6f, 1.0f );
+    l1.SetWorldPos( 200.0f, 450.0f );
     m_LightSpots.push_back( l1 );
 
     CLightSpot l2;
     
-    l2.SetColor( 1.0f, 0.5f, 0.5f, 1.0f );
-    l2.SetWorldPos( 900.0f, 100.0f );
+    l2.SetColor( 0.6f, 0.6f, 0.6f, 1.0f );
+    l2.SetWorldPos( -400.0f, 40.0f );
     m_LightSpots.push_back( l2 );
+    
+    
     CLightSpot l3;
     
-    l3.SetColor( 0.1f, 0.75f, 0.75f, 1.0f );
-    l3.SetWorldPos( 0.0f, 0.0f );
+    l3.SetColor( 0.7f, 0.7f, 0.7f, 1.0f );
+    l3.SetWorldPos( -400.0f, 820.0f );
     m_LightSpots.push_back( l3 );
-    testLevel.Load( "data/templevel.txt", m_pGameContext->TextureFactory() );
+    
+    m_pGameContext->LoadLevel( "data/templevel.txt" );
+
+    //testLevel.Load( "data/templevel3.txt", m_pGameContext->TextureFactory() );
+    //testLevel.UpdateSpatialTree( &m_pGameContext->GetSpatialQuadTree() );
     //testLevel.Save( "data/templevel.txt" );
+
+    
+
     
 }
 
@@ -84,10 +95,9 @@ void CGameState::OnStateSwitch() {
 
 void CGameState::Input() {
     
-    m_GameInput.Poll();
-    auto eventType = m_GameInput.EventType();
-
-    m_levelEditor.Input( &m_GameInput );
+    m_GameInput.Poll2();
+    
+    m_pGameContext->GetLevelEditor().Input( &m_GameInput, m_pGameContext->GetFrameDelta() );
     
     if( m_GameInput.KeyDown( SDL_SCANCODE_W ) ) {
         
@@ -107,6 +117,7 @@ void CGameState::Input() {
     
         m_pPlayer->SetMaterialToTexture( 0 );
         m_pPlayer->Displace2( 0.0f, m_pGameVars->m_PlayerYSpeed );
+
     
     }
     
@@ -123,16 +134,56 @@ void CGameState::Input() {
         m_pGameContext->CreateEntity_DamageBox( pos.GetX(), pos.GetY(), 100.0f, 100.0f, 100.0f, DMBSource::PLAYER );
         
     }
+    
+    while( m_GameInput.PollEvent() ) {
+        
+        auto eventType = m_GameInput.EventType();
 
-    if( m_GameInput.EventType() == SDL_KEYDOWN ) {
-        
-        if( m_GameInput.KeyDownOnce( SDLK_p ) ) {
+        if( m_GameInput.EventType() == SDL_KEYDOWN ) {
             
-            m_levelEditor.Toggle();
+            CLevelEditor * pLevelEditor = &m_pGameContext->GetLevelEditor();
             
+            if( pLevelEditor->IsOn() ) {
+                
+                int mx, my;
+                SDL_GetMouseState( &mx, &my );
+                
+                Vector2< float > cameraTranslate;
+                cameraTranslate = m_pGameContext->GetGameCamera().GetTranslate();
+                
+                mx -= cameraTranslate.GetX();
+                my -= cameraTranslate.GetY();
+                
+                if( m_GameInput.KeyDownOnce( SDLK_l ) ) {
+                    
+                    m_pGameContext->GetLevel().CreateNewEntity( 0, mx, my, 178, 178, 178 );
+                    
+                    /*
+                    CLightSpot newLight;
+                    
+                    newLight.SetColor( 0.7f, 0.7f, 0.7f, 1.0f );
+                    newLight.SetWorldPos( mx, my );
+                    m_LightSpots.push_back( newLight );
+                    */
+                    
+                }
+                
+            }
+            
+            if( m_GameInput.KeyDownOnce( SDLK_p ) ) {
+                
+                m_pGameContext->GetLevelEditor().Toggle();
+                
+            }
+            
+            if( m_GameInput.KeyDownOnce( SDLK_ESCAPE ) ) {
+            
+                m_bContinue = false;
+                
+            }
         }
-        
-        if( m_GameInput.KeyDownOnce( SDLK_ESCAPE ) ) {
+    
+        if( eventType == SDL_QUIT ) {
             
             m_bContinue = false;
             
@@ -140,28 +191,27 @@ void CGameState::Input() {
         
     }
     
-    
-    if( eventType == SDL_QUIT ) {
-        
-        m_bContinue = false;
-        
-    }
-    
 }
 
 void CGameState::Think() {
     
+    CCamera & c = m_pGameContext->GetGameCamera();
+    
+    c.SetTargetPos( m_pPlayer->GetX(), m_pPlayer->GetY() );
+    
     m_pGameContext->Think();
+
 
 }
 
 void CGameState::Draw() {
     
     int mx, my;
-    
     SDL_GetMouseState( &mx, &my );
     
-    m_LightSpots[2].SetWorldPos( mx, my );
+    Vector2< float > camTranslate( m_pGameContext->GetGameCamera().GetTranslate() );
+    
+    //m_LightSpots[2].SetWorldPos( mx - camTranslate.GetX(), my - camTranslate.GetY() );
     
     static CTextureImage * pixel = GetTexture( "data/textures/pixel.png" );
     
@@ -174,6 +224,8 @@ void CGameState::Draw() {
     m_AmbientLightingFBO.Clear();
     m_AmbientLightingCopyFBO.Clear();
     
+    m_pGameContext->DrawContext()->SetModelTranslate( camTranslate.GetX(), camTranslate.GetY() );
+    
     //Render all objects that will cast a shadow onto FBO.
     m_ShadowObjectsFBO.BeginDrawingToFBO();
     {
@@ -185,12 +237,22 @@ void CGameState::Draw() {
     }
     m_ShadowObjectsFBO.EndDrawingToFBO();
     
+    m_pGameContext->DrawContext()->SetModelTranslate( 0.0f, 0.0f );
+
+    
     for( auto iter : m_LightSpots ) {
         
         Vector2< float > lPos( iter.GetWorldPos() );
         Vector4< float > lColor( iter.GetColor() );
         
-        lPos.Set( lPos.GetX() / DEFAULT_SCREEN_WIDTH, lPos.GetY() / DEFAULT_SCREEN_HEIGHT );
+        float p = Util::RandomNumber( -2, 2 );
+        float r = ( float )Util::RandomNumber( 5, 15 ) / 1000.0f;
+        
+        lPos.Set( lPos.GetX() + p, lPos.GetY() + p );
+        lColor.Set( lColor.GetX() + r, lColor.GetY() + r, lColor.GetZ() + r, 1.0f );
+        
+        
+        lPos.Set( ( lPos.GetX() + camTranslate.GetX() ) / DEFAULT_SCREEN_WIDTH, ( lPos.GetY() + camTranslate.GetY() ) / DEFAULT_SCREEN_HEIGHT );
         
         //Create a shadow occlusion texture
         m_ShadowOcclusionFBO.BeginDrawingToFBO();
@@ -274,6 +336,8 @@ void CGameState::Draw() {
     
     glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 
+    m_pGameContext->DrawContext()->SetModelTranslate( camTranslate.GetX(), camTranslate.GetY() );
+
     //Draw entities into FBO
     m_EntityFBO.BeginDrawingToFBO();
         glClear( GL_COLOR_BUFFER_BIT );
@@ -285,9 +349,10 @@ void CGameState::Draw() {
     m_SceneFBO.BeginDrawingToFBO();
         glClear( GL_COLOR_BUFFER_BIT );
         m_pGameContext->GraphicsContext()->UseShader( 0 );
-        testLevel.Draw( m_pGameContext->DrawContext() );
+        m_pGameContext->DrawLevel();
     m_SceneFBO.EndDrawingToFBO();
     
+    m_pGameContext->DrawContext()->SetModelTranslate( 0.0f, 0.0f );
     
     {
     
@@ -319,7 +384,14 @@ void CGameState::Draw() {
     }
     
     m_pGameContext->GraphicsContext()->UseShader( 0 );
-    m_levelEditor.Draw( m_pGameContext->DrawContext() );
+    m_pGameContext->DrawLevelEditor();
+    
+    //m_pGameContext->DrawQuadTree();
+    
+    std::stringstream ss;
+    ss << m_pPlayer->GetX() << ", " << m_pPlayer->GetY();
+    
+    m_pGameContext->FontFactory()->GetFont( "data/fonts/Minecraftia-Regular.ttf", 32 )->DrawString( m_pGameContext->DrawContext(), ss.str(), 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f );
     
     m_pGameContext->GraphicsContext()->SwapBuffers();
     
@@ -482,8 +554,6 @@ void CGameState::Draw() {
     mat.Translate( 0.0f, m_ShadowOcclusionFBO.GetHeight() + 30.0f, 0.0f );
    // m_ShadowOcclusionFBO.DrawTexture( m_pGameContext->DrawContext(), &mat );
     
-    
-        //m_pGameContext->DrawQuadTree();
     
     
     

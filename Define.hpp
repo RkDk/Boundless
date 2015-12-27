@@ -17,7 +17,8 @@ enum ENTTYPE {
 
     PLAYER = 0x01,
     ENEMY = 0x02,
-    DAMAGE = 0x04
+    DAMAGE = 0x04,
+    WALL = 0x08
     
 };
 
